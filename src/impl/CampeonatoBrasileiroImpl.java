@@ -146,89 +146,75 @@ public class CampeonatoBrasileiroImpl {
         return getTodosOsPlacares().entrySet().stream().min((a, b) -> a.getValue().compareTo(b.getValue())).get();
     }
 
-    public Set<PosicaoTabela> getTabela() {
-      Set<PosicaoTabela> posicaoTabelaMandante = new HashSet<>();
-      Set<PosicaoTabela> posicaoTabelaVisitante = new HashSet<>();
+    public Set<PosicaoTabela> getTabela(){
 
-      Map<Time, List<Jogo>> timeMandante = jogos.stream()
-          .filter(filtro) //filtrar por ano
-          .collect(Collectors.groupingBy(
-              Jogo::mandante,
-              Collectors.mapping(Function.identity(), Collectors.toList())));
-      Map<Time, List<Jogo>> timeVisitante = jogos.stream()
-          .filter(filtro) //filtrar por ano
-          .collect(Collectors.groupingBy(
-              Jogo::visitante,
-              Collectors.mapping(Function.identity(), Collectors.toList())));
+      todosOsJogosPorTime().entrySet().forEach(x -> System.out.println(x.getKey() + ": " + x.getValue()));
 
-      Map<Time, List<Jogo>> timeVencedor = jogos.stream()
-          .filter(filtro) //filtrar por ano
-          .collect(Collectors.groupingBy(
-              Jogo::visitante,
-              Collectors.mapping(Function.identity(), Collectors.toList())));
+      System.out.println("--------------------------");
 
-      
+      return todosOsJogosPorTime().entrySet().stream()
+          .map(jogo -> {
+            Long vitorias =
+                jogo.getValue().stream().filter(x -> {
+                  return (jogo.getKey().equals(x.mandante()) ?
+                      x.mandantePlacar() > x.visitantePlacar() :
+                      x.mandantePlacar() < x.visitantePlacar());
+                }).count();
+            Long derrotas = jogo.getValue().stream().filter(x ->  (jogo.getKey().equals(x.mandante()) ?
+                  x.mandantePlacar() < x.visitantePlacar() :
+                  x.mandantePlacar() > x.visitantePlacar())
+            ).count();
 
+            Long empates =
+                jogo.getValue().stream().filter(x -> x.mandantePlacar() == x.visitantePlacar()).count();
 
-      for (Map.Entry<Time, List<Jogo>> clube : timeMandante.entrySet()) {
-        Long vitorias = clube.getValue().stream()
-            .filter(jogo -> jogo.mandantePlacar() > jogo.visitantePlacar())
-            .count();
-        Long derrotas = clube.getValue().stream()
-            .filter(jogo -> jogo.mandantePlacar() < jogo.visitantePlacar())
-            .count();
-        Long empates = clube.getValue().stream()
-            .filter(jogo -> jogo.mandantePlacar() == jogo.visitantePlacar())
-            .count();
-        Long golsFeitos = clube.getValue().stream()
-            .map(Jogo::mandantePlacar)
-            .reduce(0, Integer::sum).longValue();
-        Long golsSofridos = clube.getValue().stream()
-            .map(Jogo::visitantePlacar)
-            .reduce(0, Integer::sum).longValue();
-        Long saldoDeGols = golsFeitos - golsSofridos;
-        Long jogos = clube.getValue().stream().count();
+            Long golsFeitos =
+                jogo.getValue().stream().map(x ->  (jogo.getKey().equals(x.mandante()) ?
+                x.mandantePlacar() :
+                x.visitantePlacar())
+            ).reduce(0, (a,b) -> a+b).longValue();
 
-        posicaoTabelaMandante.add(new PosicaoTabela(clube.getKey(), vitorias,
-            derrotas, empates, golsFeitos, golsSofridos, saldoDeGols,
-            jogos));
-      }
+            Long golsRecebidos =
+                jogo.getValue().stream().map(x ->  (jogo.getKey().equals(x.mandante()) ?
+                    x.visitantePlacar() :
+                    x.mandantePlacar())
+                ).reduce(0, (a,b) -> a+b).longValue();
+            Long saldoDeGols = golsFeitos - golsRecebidos;
+            Long jogos = jogo.getValue().stream().count();
 
-      for (Map.Entry<Time, List<Jogo>> clube : timeVisitante.entrySet()) {
-        Long vitorias = clube.getValue().stream()
-            .filter(jogo -> jogo.mandantePlacar() < jogo.visitantePlacar())
-            .count();
-        Long derrotas = clube.getValue().stream()
-            .filter(jogo -> jogo.mandantePlacar() > jogo.visitantePlacar())
-            .count();
-        Long empates = clube.getValue().stream()
-            .filter(jogo -> jogo.mandantePlacar() == jogo.visitantePlacar())
-            .count();
-        Long golsFeitos = clube.getValue().stream()
-            .map(Jogo::visitantePlacar)
-            .reduce(0, Integer::sum).longValue();
-        Long golsSofridos = clube.getValue().stream()
-            .map(Jogo::mandantePlacar)
-            .reduce(0, Integer::sum).longValue();
-        Long saldoDeGols = golsFeitos - golsSofridos;
-        Long jogos = clube.getValue().stream().count();
+            return new PosicaoTabela(jogo.getKey(), vitorias, derrotas, empates,
+                golsFeitos,
+                golsRecebidos, saldoDeGols, jogos);
+          })
+          .peek(jogo -> {
+            System.out.println(jogo.time() + ": " + jogo.pontos());
 
-        posicaoTabelaVisitante.add(new PosicaoTabela(clube.getKey(), vitorias,
-            derrotas, empates, golsFeitos, golsSofridos, saldoDeGols,
-            jogos));
-      }
-      Set<PosicaoTabela> saida = new HashSet<>();
+          })
+          .collect(Collectors.toSet());
 
-
-//      for (PosicaoTabela k : posicaoTabelaMandante) {
-//        saida.add(k);
-//      }
-//      for (PosicaoTabela k : posicaoTabelaVisitante) {
-//        System.out.println(saida.contains(k));
-//      }
-      saida.addAll(posicaoTabelaMandante);
-      saida.addAll(posicaoTabelaVisitante);
-      return saida;
     }
 
+    public Map<Time, List<Jogo>> todosOsJogosPorTime(){
+      return Stream.of(
+          jogos.stream()
+          .filter(filtro)
+          .collect(Collectors.groupingBy(
+              Jogo::mandante,
+              Collectors.mapping(Function.identity(), Collectors.toList()))),
+          jogos.stream()
+              .filter(filtro)
+              .collect(Collectors.groupingBy(
+                  Jogo::visitante,
+                  Collectors.mapping(Function.identity(),
+                      Collectors.toList()))))
+          .flatMap(jogo -> jogo.entrySet().stream())
+          .collect(Collectors.toMap(
+              jogo -> jogo.getKey(),
+              jogo -> jogo.getValue(),
+              (jogo1, jogo2) -> {
+                jogo1.addAll(jogo2);
+                return jogo1;
+              }
+          ));
+    }
 }

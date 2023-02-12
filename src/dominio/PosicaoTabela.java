@@ -11,10 +11,14 @@ public record PosicaoTabela(Time time,
                             Long saldoDeGols,
                             Long jogos) {
 
+    public Long pontos(){
+        return vitorias*3+empates;
+    }
+
     @Override
     public String toString() {
         return  time +
-                ", pontos=" + ((vitorias*3) + empates) + // desenvolver forma
+                ", pontos=" + pontos() + // desenvolver forma
             // de obter a
             // pontuação
                 ", vitorias=" + vitorias +

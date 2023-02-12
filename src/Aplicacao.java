@@ -4,9 +4,9 @@ import impl.CampeonatoBrasileiroImpl;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.IntSummaryStatistics;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Aplicacao {
 
@@ -21,8 +21,8 @@ public class Aplicacao {
                     (jogo) -> jogo.data().data().getYear() == 2020 || jogo.data().data().getYear() == 2021);
         // imprimir estatisticas
         imprimirEstatisticas(resultados);
-
-        // imprimir tabela ordenada
+//
+//        // imprimir tabela ordenada
         imprimirTabela(resultados.getTabela());
 
     }
@@ -64,7 +64,9 @@ public class Aplicacao {
         System.out.println();
         System.out.println("## TABELA CAMPEONADO BRASILEIRO: ##");
         int colocacao = 1;
-        for (PosicaoTabela posicao : posicoes) {
+        List<PosicaoTabela> sorted =
+            posicoes.stream().sorted(Comparator.comparingLong(PosicaoTabela::pontos).reversed()).toList();
+        for (PosicaoTabela posicao : sorted) {
             System.out.println(colocacao +". " + posicao);
             colocacao++;
         }
