@@ -36,11 +36,11 @@ public record PosicaoTabela(Time time,
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PosicaoTabela that = (PosicaoTabela) o;
-        return Objects.equals(vitorias, that.vitorias) && Objects.equals(empates, that.empates);
+        return Objects.equals(vitorias, that.vitorias) && Objects.equals(golsPositivos, that.golsPositivos) && Objects.equals(saldoDeGols, that.saldoDeGols);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vitorias, empates);
+        return Objects.hash(vitorias, golsPositivos, saldoDeGols);
     }
 }
