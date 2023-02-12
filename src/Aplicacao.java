@@ -17,8 +17,8 @@ public class Aplicacao {
 
         // obter a implementação: (ponto extra - abstrair para interface)
         CampeonatoBrasileiroImpl resultados =
-                new CampeonatoBrasileiroImpl(file, (jogo) -> jogo.data().data().getYear() == 2019);
-
+                new CampeonatoBrasileiroImpl(file,
+                    (jogo) -> jogo.data().data().getYear() == 2020 || jogo.data().data().getYear() == 2021);
         // imprimir estatisticas
         imprimirEstatisticas(resultados);
 
@@ -39,7 +39,8 @@ public class Aplicacao {
         System.out.println("Estatisticas (Placar mais repetido) - "
                 + placarMaisRepetido.getKey() + " (" +placarMaisRepetido.getValue() + " jogo(s))");
 
-        Map.Entry<Resultado, Long> placarMenosRepetido = brasileirao.getPlacarMenosRepetido();
+        Map.Entry<Resultado, Long> placarMenosRepetido =
+            brasileirao.getPlacarMenosRepetido();
 
         System.out.println("Estatisticas (Placar menos repetido) - "
                 + placarMenosRepetido.getKey() + " (" +placarMenosRepetido.getValue() + " jogo(s))");
