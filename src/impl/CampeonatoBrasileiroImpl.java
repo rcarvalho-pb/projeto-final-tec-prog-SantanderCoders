@@ -19,17 +19,17 @@ import java.util.stream.Stream;
 
 public class CampeonatoBrasileiroImpl {
 
-    private Map<Integer, List<Jogo>> brasileirao;
-    private List<Jogo> jogos;
-    private Predicate<Jogo> filtro;
+  private final List<Jogo> jogos;
+    private final Predicate<Jogo> filtro;
     public CampeonatoBrasileiroImpl(Path arquivo, Predicate<Jogo> filtro) throws IOException {
         this.jogos = lerArquivo(arquivo);
         this.filtro = filtro;
-        this.brasileirao = jogos.stream()
-                .filter(filtro) //filtrar por ano
-                .collect(Collectors.groupingBy(
-                        Jogo::rodada,
-                        Collectors.mapping(Function.identity(), Collectors.toList())));
+      //filtrar por ano
+      Map<Integer, List<Jogo>> brasileirao = jogos.stream()
+          .filter(filtro) //filtrar por ano
+          .collect(Collectors.groupingBy(
+              Jogo::rodada,
+              Collectors.mapping(Function.identity(), Collectors.toList())));
 
 
     }
