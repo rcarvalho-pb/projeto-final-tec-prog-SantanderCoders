@@ -102,7 +102,7 @@ public class CampeonatoBrasileiroImpl {
         return getTodosOsPlacares()
             .entrySet()
             .stream().
-            filter(jogo -> jogo.getKey().mandante() == jogo.getKey().visitante())
+            filter(jogo -> jogo.getKey().mandante().equals(jogo.getKey().visitante()))
             .map(Map.Entry::getValue)
             .reduce(0L, Long::sum);
     }
@@ -148,10 +148,6 @@ public class CampeonatoBrasileiroImpl {
 
     public Set<PosicaoTabela> getTabela(){
 
-      todosOsJogosPorTime().entrySet().forEach(x -> System.out.println(x.getKey() + ": " + x.getValue()));
-
-      System.out.println("--------------------------");
-
       return todosOsJogosPorTime().entrySet().stream()
           .map(jogo -> {
             Long vitorias =
@@ -166,29 +162,25 @@ public class CampeonatoBrasileiroImpl {
             ).count();
 
             Long empates =
-                jogo.getValue().stream().filter(x -> x.mandantePlacar() == x.visitantePlacar()).count();
+                jogo.getValue().stream().filter(x -> x.mandantePlacar().equals(x.visitantePlacar())).count();
 
             Long golsFeitos =
                 jogo.getValue().stream().map(x ->  (jogo.getKey().equals(x.mandante()) ?
                 x.mandantePlacar() :
                 x.visitantePlacar())
-            ).reduce(0, (a,b) -> a+b).longValue();
+            ).reduce(0, Integer::sum).longValue();
 
             Long golsRecebidos =
                 jogo.getValue().stream().map(x ->  (jogo.getKey().equals(x.mandante()) ?
                     x.visitantePlacar() :
                     x.mandantePlacar())
-                ).reduce(0, (a,b) -> a+b).longValue();
+                ).reduce(0, Integer::sum).longValue();
             Long saldoDeGols = golsFeitos - golsRecebidos;
-            Long jogos = jogo.getValue().stream().count();
+            Long jogos = (long) jogo.getValue().size();
 
             return new PosicaoTabela(jogo.getKey(), vitorias, derrotas, empates,
                 golsFeitos,
                 golsRecebidos, saldoDeGols, jogos);
-          })
-          .peek(jogo -> {
-            System.out.println(jogo.time() + ": " + jogo.pontos());
-
           })
           .collect(Collectors.toSet());
 
@@ -209,8 +201,8 @@ public class CampeonatoBrasileiroImpl {
                       Collectors.toList()))))
           .flatMap(jogo -> jogo.entrySet().stream())
           .collect(Collectors.toMap(
-              jogo -> jogo.getKey(),
-              jogo -> jogo.getValue(),
+              Map.Entry::getKey,
+              Map.Entry::getValue,
               (jogo1, jogo2) -> {
                 jogo1.addAll(jogo2);
                 return jogo1;
